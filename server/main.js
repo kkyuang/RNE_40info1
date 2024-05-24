@@ -57,6 +57,7 @@ app.post('/addmap', (req, res) => {
     if (!fs.existsSync(mapPath)) {
         fs.mkdirSync(mapPath, { recursive: true });
         fs.writeFileSync(path.join(mapPath, 'crowdData.json'), '{}', 'utf8');
+        fs.writeFileSync(path.join(mapPath, 'evacuation.json'), '{}', 'utf8');
         // HTML 파일 읽기 및 동적 처리
         fs.readFile(path.join(__dirname, 'html', 'mappage.html'), 'utf8', (err, data) => {
             if (err) {
@@ -145,6 +146,19 @@ app.post('/update-crowd/:mapId', (req, res) => {
     crowdData[areaId] = density;
     fs.writeFileSync(filePath, JSON.stringify(crowdData, null, 2), 'utf8');
     res.send(`Data for ${mapId} updated successfully.`);
+});
+
+// 대피 경로 저장
+app.post('/update-evacuation/:mapId', (req, res) => {
+    const mapId = req.params.mapId;
+    const { evacuationPaths } = req.body;
+    const folderPath = path.join(BASE_DATA_PATH, mapId);
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
+    const filePath = path.join(folderPath, 'evacuation.json');
+    fs.writeFileSync(filePath, JSON.stringify(evacuationPaths, null, 2), 'utf8');
+    res.send(`Evacuation paths for ${mapId} updated successfully. <a href="/map/${mapId}">맵으로 돌아가기</a>`);
 });
 
 // 군중 데이터를 클라이언트에 제공
