@@ -1,0 +1,16 @@
+[
+  [
+    {
+      "area": "_01",
+      "position": "start"
+    },
+    {
+      "area": "_02",
+      "position": "center"
+    },
+    {
+      "area": "_03",
+      "position": "end"
+    }
+  ]
+]

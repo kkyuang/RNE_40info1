@@ -57,22 +57,34 @@ app.post('/addmap', (req, res) => {
     if (!fs.existsSync(mapPath)) {
         fs.mkdirSync(mapPath, { recursive: true });
         fs.writeFileSync(path.join(mapPath, 'crowdData.json'), '{}', 'utf8');
-        fs.writeFileSync(path.join(mapPath, 'evacuation.json'), '{}', 'utf8');
-        // HTML 파일 읽기 및 동적 처리
-        fs.readFile(path.join(__dirname, 'html', 'mappage.html'), 'utf8', (err, data) => {
-            if (err) {
-                res.status(500).send('Error reading HTML file');
-                return;
-            }
-            const updatedHtml = data.replaceAll('${mapName}', mapName);
-            fs.writeFile(path.join('maps', `${mapName}.html`), updatedHtml, 'utf8', (err) => {
-                if (err) {
-                    res.status(500).send('Error writing HTML file');
-                    return;
-                }
-                res.send(`맵 '${mapName}'이(가) 성공적으로 추가되었습니다. <a href="/">홈으로 돌아가기</a>`);
-            });
-        });
+        // HTML 파일 생성
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${mapName} - 인구 밀도 알리미</title>
+</head>
+<body>
+    <h1>${mapName} - 인구 밀도 알리미</h1>
+    <a href="/crowd-count/${mapName}"><button>군중 수 입력</button></a>
+    <form action="/upload-map/${mapName}" method="post" enctype="multipart/form-data">
+        <label for="mapFile">SVG 파일 업로드:</label>
+        <input type="file" id="mapFile" name="mapFile" accept=".svg" required><br><br>
+        <input type="submit" value="업로드">
+    </form>
+
+    <div id="mapContainer">
+        <embed src="/data/${mapName}/map.svg" type="image/svg+xml" width="800" height="600" />
+    </div>
+    <p>여기에 ${mapName}의 세부 사항을 표시합니다.</p>
+    <a href="/">홈으로 돌아가기</a>
+</body>
+</html>
+        `;
+        fs.writeFileSync(path.join('maps', `${mapName}.html`), htmlContent, 'utf8');
+        res.send(`맵 '${mapName}'이(가) 성공적으로 추가되었습니다. <a href="/">홈으로 돌아가기</a>`);
     } else {
         res.send(`맵 '${mapName}'은(는) 이미 존재합니다. <a href="/">홈으로 돌아가기</a>`);
     }
@@ -146,19 +158,6 @@ app.post('/update-crowd/:mapId', (req, res) => {
     crowdData[areaId] = density;
     fs.writeFileSync(filePath, JSON.stringify(crowdData, null, 2), 'utf8');
     res.send(`Data for ${mapId} updated successfully.`);
-});
-
-// 대피 경로 저장
-app.post('/update-evacuation/:mapId', (req, res) => {
-    const mapId = req.params.mapId;
-    const { evacuationPaths } = req.body;
-    const folderPath = path.join(BASE_DATA_PATH, mapId);
-    if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-    }
-    const filePath = path.join(folderPath, 'evacuation.json');
-    fs.writeFileSync(filePath, JSON.stringify(evacuationPaths, null, 2), 'utf8');
-    res.send(`Evacuation paths for ${mapId} updated successfully. <a href="/map/${mapId}">맵으로 돌아가기</a>`);
 });
 
 // 군중 데이터를 클라이언트에 제공
