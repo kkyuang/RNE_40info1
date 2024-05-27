@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <form action="http://localhost:5000/image" method="post" enctype="multipart/form-data">
+        <label for="file">Choose an image file:</label>
+        <input type="file" id="file" name="file" accept=".jpg, .jpeg, .png" required>
+        <input type="text" id="map-name" name="map-name" placeholder="맵 이름">
+        <input type="text" id="area-id" name="area-id" placeholder="구역 이름">
+        <br><br>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+</html>
